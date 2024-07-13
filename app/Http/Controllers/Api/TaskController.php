@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Dto\TaskData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Task\StoreRequest;
 use App\Http\Requests\Task\UpdateRequest;
 use App\Http\Resources\Task\TaskResource;
 use App\Models\Task;
 use App\Services\TaskService;
+use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
@@ -22,11 +24,11 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRequest $request)
+    public function store(Request $request, TaskData $taskData, TaskService $taskService)
     {
-        $data = $request->validated();
+        $data = $taskData::from($request->all());
 
-        TaskService::create($data);
+        $taskService::create(data: $data->toArray());
         return response('success', 201);
     }
 
@@ -45,11 +47,11 @@ class TaskController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRequest $request, Task $task)
+    public function update(UpdateRequest $request, Task $task, TaskService $taskService)
     {
         $data = $request->validated();
 
-        $task = TaskService::update($task, $data);
+        $task = $taskService::update(task: $task, data: $data);
 
         return TaskResource::make($task)->resolve();
     }
